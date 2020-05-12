@@ -4,27 +4,31 @@ const databaseMapper = require('../databaseMapper')
 
 
 const persistsPokemons = async (redisClient, pokemons) =>{
-    pokemons.forEach(async pokemon => {
+    return pokemons.map(async pokemon => {
         redisClient.hgetall(pokemon, (async function(err, pokemon){
             if(err){
                 console.log(err)
             }
             try{
             const res = await axios.get(pokemon.url)
-            console.log(res.data)
-            const reuslt = databaseMapper.insert(res.data)
-            console.log(reuslt)
+            const result = databaseMapper.insert(res.data)
+            return result
             }catch(err){
                 console.log(err)
                 throw err
             }
-          
         }))
-
-        return true
+        return pokemon
     });
 }
 
+const getPersistedPokemons = async () =>{
+    const pokemons = await databaseMapper.get();
+    console.log(pokemons)
+    return pokemons
+}
+
 module.exports = {
-    persistsPokemons
+    persistsPokemons, 
+    getPersistedPokemons
 }

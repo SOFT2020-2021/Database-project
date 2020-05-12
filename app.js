@@ -4,6 +4,8 @@ const path = require('path')
 const { createUUID } = require('./util/idGenerator') 
 const bodyParser = require('body-parser')
 const axios = require('axios');
+const { fetchData } = require('./generateDatasets')
+console.log(fetchData)
 
 
 //Set Port 
@@ -24,7 +26,10 @@ redisClient.on('connect', () => console.log('Redis client connected'))
 
 
 
-app.listen(PORT, () => console.log(`Listining  on ${PORT}`))
+app.listen(PORT, async () => {
+    fetchData(),
+    console.log(`Listining  on ${PORT}`)
+})
 
 
 const pokemonController = require('./pokemon/pokemon.controller');
@@ -66,7 +71,6 @@ app.get('/user/search/:id', (req, res, next) =>{
         if(!obj){
             return res.json({message: `User id ${id} does not exists`}).status(401)
         }else{
-            obj.id
             return res.json({user: obj}).status(200);
         }
 

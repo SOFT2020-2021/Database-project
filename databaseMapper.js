@@ -14,13 +14,17 @@ client.connect(function(err){
      db = client.db(DATABASE_NAME)
 })
 
+module.exports.get = async () =>{
+    let res = await db.collection(tableName).find({}).toArray()
+    return res
+}
+
 
 module.exports.insert = (document) =>{
-    db.collection(tableName).insert(document, function(err, result){
+    return db.collection(tableName).insert(document, function(err, result){
         if(err){
             throw err
         }
-        console.log(result);
         return result
     })
 

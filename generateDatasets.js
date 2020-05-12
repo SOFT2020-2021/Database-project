@@ -3,18 +3,15 @@
 const axios = require('axios')
 const REDIS_PORT = process.env.REDISPORT || 6379;
 
-
-
 //depdencies
 const redis = require('redis');
 
-const limit = 400
+const limit = 1000
 const apiUrl = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}`
 
 
 //client initialization
 const redisClient = redis.createClient(REDIS_PORT);
-
 
 
 
@@ -36,10 +33,9 @@ const fetchData = async() =>{
     if(response.status === 200){
         const pokemons = response.data.results
         pokeMapper(pokemons)
-
     }else{
         throw new Error("Could not get data")
     }
 }
 
-fetchData()
+module.exports = {fetchData}
