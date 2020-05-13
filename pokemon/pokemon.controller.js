@@ -13,6 +13,7 @@ routes.post('/create', async(req, res) =>{
     const { pokemons } = req.body;
     try{
         const promises = await persistsPokemons(redisClient, pokemons);
+        console.log(promises)
         const values = await Promise.all(promises);
         return res.json({pokemons: values, message: "created"}).status(201)
     }catch(error){
