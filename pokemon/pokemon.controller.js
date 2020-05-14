@@ -44,7 +44,8 @@ routes.get('/get/:name', async(req, res) =>{
         }
         console.log(obj.url)
         const pokemonData = await axios.get(obj.url);
-        /*redisClient.hmset(name, {content: JSON.stringify(pokemonData.data)}, function(err, result){
+        /*
+        redisClient.hmset(name, {content: JSON.stringify(pokemonData.data)}, function(err, result){
             console.log(result)
             return result
         })

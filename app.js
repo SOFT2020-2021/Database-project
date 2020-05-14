@@ -24,8 +24,6 @@ app.use(bodyParser.json())
 redisClient.on('connect', () => console.log('Redis client connected'))
 
 
-
-
 app.listen(PORT, async () => {
     fetchData(),
     console.log(`Listining  on ${PORT}`)

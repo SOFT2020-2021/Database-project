@@ -4,15 +4,13 @@ const axios = require('axios')
 const REDIS_PORT = process.env.REDISPORT || 6379;
 
 //depdencies
+const { pokemonLimit } = require('./config');
 const redis = require('redis');
-
-const limit = 1000
-const apiUrl = `https://pokeapi.co/api/v2/pokemon/?limit=${limit}`
+const apiUrl = `https://pokeapi.co/api/v2/pokemon/?limit=${pokemonLimit}`
 
 
 //client initialization
 const redisClient = redis.createClient(REDIS_PORT);
-
 
 
 const pokeMapper = (pokemons) => {

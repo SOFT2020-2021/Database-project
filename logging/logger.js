@@ -22,8 +22,9 @@ createLogMessage({message: "hello blbla"})
 //Test consumer //denne kan du bruge til at teste med.. RabbitMq benytter producer/consumer pattern
 
 
-
 /*
+
+
 const consumeMessage = () =>{
     open.then(function(conn) {
         return conn.createChannel();
