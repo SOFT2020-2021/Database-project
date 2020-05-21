@@ -1,7 +1,7 @@
-var q = 'logs';
- 
-var open = require('amqplib').connect('amqp://localhost');
-
+const q = 'logs'; 
+const open = require('amqplib').connect('amqp://localhost');
+const { logTypes } = require('../config')
+console.log(logTypes)
 
 //her har jeg lavet en genereisk logger, der sender shit til vores flask server
 //du kan eventuelt sender forskellige objekter med, igennem forskellige funktioner bare hus, at brug 
@@ -16,7 +16,9 @@ const createLogMessage = (content) =>{
       }).catch(console.warn);
 }
 
-createLogMessage({message: "hello blbla"})
+//createLogMessage({message: "hello blbla", pokemon: "id123", pokemon2: "id321"})
+
+createLogMessage({type: logTypes.BATTLE, fight: "fight123", pokemon: "id123", pokemon2: "id321", turns: 10, winner: "id123"})
 
 
 //Test consumer //denne kan du bruge til at teste med.. RabbitMq benytter producer/consumer pattern
