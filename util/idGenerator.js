@@ -1,3 +1,3 @@
-const uuid = require('uuid');
+const uuid = require('uuid')
 
-module.exports.createUUID = () =>(uuid.v4())
+module.exports.createUUID = () => uuid.v4()

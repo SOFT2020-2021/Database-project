@@ -1,5 +1,7 @@
-module.exports = Object.freeze({
-    tableName: "Pokemon"
-})
+const production = true
+const pokemonLimit = production ? 1000 : 2
 
-module.exports.pokemonLimit = 1000
+module.exports = {
+    pokemonLimit,
+    production
+}
