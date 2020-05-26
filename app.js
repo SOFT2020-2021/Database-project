@@ -18,12 +18,20 @@ app.use('/team', teamRoutes)
 app.listen(PORT, async () => {
     Promise.all([redisClient.open(), mongoClient.open(), postgresClient.open()])
         .then(async () => {
-            console.log('opened all connections succesfully')
             await mongoClient.deleteAll()
+            await postgresClient.deleteAllRows()
             const pokemons = await pokemonApi.getPokemons()
-            await mongoClient.insertMany(pokemons)
-            const pokemonDocuments = await mongoClient.getAll()
-            pokemonDocuments.forEach((pokemon) => console.log(pokemon.name))
+            Promise.all([
+                mongoClient.insertMany(pokemons),
+                postgresClient.populateTrainers(),
+                postgresClient.populatePokemons(
+                    pokemons.map((p) => ({ id: p.id, name: p.name }))
+                ),
+            ]).then(async () => {
+                const pokemonDocuments = await mongoClient.getAll()
+                await postgresClient.populateTrainerPokemons()
+                pokemonDocuments.forEach((pokemon) => console.log(pokemon.name))
+            })
         })
         .catch((e) => {
             console.warn(

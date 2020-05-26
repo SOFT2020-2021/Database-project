@@ -1,4 +1,5 @@
 const { Pool } = require('pg')
+const trainers = require('../data/trainers.json')
 
 const pool = new Pool({
     user: 'pokemon_admin',
@@ -19,6 +20,79 @@ const open = () => {
 
 const close = () => {
     return pool.end()
+}
+
+const deleteAllRows = async () => {
+    const client = await pool.connect()
+    try {
+        Promise.all([
+            (client.query('DELETE FROM trainers WHERE 1 > 0'),
+            client.query('DELETE FROM pokemons WHERE 1 > 0'),
+            client.query('DELETE FROM trainer_pokemons WHERE 1 > 0')),
+        ]).then(() => client.release())
+    } catch (e) {
+        client.release()
+        throw Error(`something went wrong with deleting all rows: ${e}`)
+    }
+}
+
+const populateTrainerPokemons = async () => {
+    const client = await pool.connect()
+    try {
+        await client.query(`
+            INSERT INTO trainer_pokemons(trainer_id, pokemon_id)
+            select tr.id, x.id
+            from trainers tr
+            cross join lateral (
+                select id
+                from pokemons
+                order by random() 
+                limit 6
+            ) x`)
+        client.release()
+    } catch (e) {
+        client.release()
+        throw Error(
+            `something went wrong with populating trainer pokemons: ${e}`
+        )
+    }
+}
+
+const populateTrainers = async () => {
+    const client = await pool.connect()
+    try {
+        const values = Object.values(trainers).reduce((acc, cur, i) => {
+            acc += `('${cur}')${i !== trainers.length - 1 ? ',' : ';'}`
+            return acc
+        }, '')
+        await client.query(`INSERT INTO 
+                                trainers(name) 
+                            VALUES ${values}`)
+        client.release()
+    } catch (e) {
+        client.release()
+        throw Error(`something went wrong with populating trainers: ${e}`)
+    }
+}
+
+const populatePokemons = async (pokemons) => {
+    const client = await pool.connect()
+    try {
+        const values = Object.values(pokemons).reduce((acc, cur, i) => {
+            acc += `(${cur.id}, '${cur.name}')${
+                i !== pokemons.length - 1 ? ',' : ';'
+            }`
+            return acc
+        }, '')
+
+        await client.query(`INSERT INTO 
+                                pokemons(id, name)
+                            VALUES ${values}`)
+        client.release()
+    } catch (e) {
+        client.release()
+        throw Error(`something went wrong with populate pokemons: ${e}`)
+    }
 }
 
 const getTrainerById = async (userId) => {
@@ -86,8 +160,12 @@ const deleteTrainer = async (trainerId) => {
 module.exports = {
     open,
     close,
+    deleteAllRows,
     getTrainerById,
     deleteTrainer,
+    populateTrainers,
+    populateTrainerPokemons,
+    populatePokemons,
     updateTrainerName,
     getTrainerByName,
 }

@@ -49,7 +49,17 @@ const deleteAll = () => {
     })
 }
 
+const getByName = (name) => {
+    return new Promise((resolve, reject) => {
+        db.collection(collectionName).find({name}, function (err, result) {
+            if (err) reject(err)
+            resolve({ removed: result.result.n })
+        })
+    })
+}
+
 module.exports = {
+    getByName,
     deleteAll,
     getAll,
     insertMany,
