@@ -25,11 +25,18 @@ const close = () => {
 const deleteAllRows = async () => {
     const client = await pool.connect()
     try {
-        Promise.all([
-            (client.query('DELETE FROM trainers WHERE 1 > 0'),
-            client.query('DELETE FROM pokemons WHERE 1 > 0'),
-            client.query('DELETE FROM trainer_pokemons WHERE 1 > 0')),
-        ]).then(() => client.release())
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                (client.query('DELETE FROM trainers WHERE 1 > 0'),
+                client.query('DELETE FROM pokemons WHERE 1 > 0'),
+                client.query('DELETE FROM trainer_pokemons WHERE 1 > 0')),
+            ])
+                .then(() => {
+                    client.release()
+                    resolve()
+                })
+                .catch((e) => reject(e))
+        })
     } catch (e) {
         client.release()
         throw Error(`something went wrong with deleting all rows: ${e}`)
@@ -55,6 +62,19 @@ const populateTrainerPokemons = async () => {
         throw Error(
             `something went wrong with populating trainer pokemons: ${e}`
         )
+    }
+}
+
+const insertTrainer = async (trainerName) => {
+    const client = await pool.connect()
+    try {
+        await client.query('INSERT INTO trainers(name) VALUES($1)', [
+            trainerName,
+        ])
+        client.release()
+    } catch (e) {
+        client.release()
+        throw Error(`something went wrong with getting trainer by id: ${e}`)
     }
 }
 
@@ -160,6 +180,7 @@ const deleteTrainer = async (trainerId) => {
 module.exports = {
     open,
     close,
+    insertTrainer,
     deleteAllRows,
     getTrainerById,
     deleteTrainer,

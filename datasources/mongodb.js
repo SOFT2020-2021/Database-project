@@ -42,7 +42,7 @@ const insertMany = (documents) => {
 
 const deleteAll = () => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).remove({}, function (err, result) {
+        db.collection(collectionName).deleteMany({}, function (err, result) {
             if (err) reject(err)
             resolve({ removed: result.result.n })
         })

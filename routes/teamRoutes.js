@@ -1,15 +1,14 @@
 const { Router } = require('express')
+const postgresClient = require('../datasources/postgres')
 const router = Router()
 
-router.post('/create', (req, res) => {
-    
-})
-
-router.get('/search/:id', (req, res) => {
-})
-
-router.delete('/delete/:id', (req, res) => {
-
+router.get('/:trainerId', async (req, res) => {
+    try {
+        const team = await postgresClient.getTeam(req.params.trainerId)
+        res.json(team)
+    } catch (e) {
+        res.status(500).send(e.toString())
+    }
 })
 
 module.exports = router

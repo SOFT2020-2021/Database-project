@@ -7,35 +7,74 @@ const pokemonRoutes = require('./routes/pokemonRoutes')
 const trainerRoutes = require('./routes/trainerRoutes')
 const teamRoutes = require('./routes/teamRoutes')
 const pokemonApi = require('./util/pokemonApi')
+const cliProgress = require('cli-progress')
+const { production } = require('./config')
 const PORT = process.env.PORT || 3001
 
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json)
 app.use('/pokemon', pokemonRoutes)
 app.use('/trainer', trainerRoutes)
 app.use('/team', teamRoutes)
 
-app.listen(PORT, async () => {
-    Promise.all([redisClient.open(), mongoClient.open(), postgresClient.open()])
-        .then(async () => {
+Promise.all([
+    redisClient.open(),
+    mongoClient.open(),
+    postgresClient.open(),
+]).then(async () => {
+    if (!production) {
+        app.use('', (req, res, next) => {
+            console.log(`
+                url: ${req.url}
+                body: ${JSON.stringify(req.body)}
+                method: ${req.method}
+            `)
+            next()
+        })
+        app.listen(PORT, () => {
+            console.log(
+                `server is running on http://localhost:127.0.0.1:${PORT}`
+            )
+        })
+    } else {
+        app.listen(PORT, async () => {
+            const s = Date.now()
+            const progressBar = new cliProgress.SingleBar(
+                {},
+                cliProgress.Presets.shades_classic
+            )
+            progressBar.start(200, 0)
             await mongoClient.deleteAll()
             await postgresClient.deleteAllRows()
+            progressBar.update(50)
             const pokemons = await pokemonApi.getPokemons()
+            progressBar.update(100)
+            mongoClient.insertMany(pokemons)
             Promise.all([
-                mongoClient.insertMany(pokemons),
                 postgresClient.populateTrainers(),
                 postgresClient.populatePokemons(
                     pokemons.map((p) => ({ id: p.id, name: p.name }))
                 ),
-            ]).then(async () => {
-                const pokemonDocuments = await mongoClient.getAll()
-                await postgresClient.populateTrainerPokemons()
-                pokemonDocuments.forEach((pokemon) => console.log(pokemon.name))
-            })
-        })
-        .catch((e) => {
+            ])
+                .then(async () => {
+                    progressBar.update(150)
+                    try {
+                        await postgresClient.populateTrainerPokemons()
+                        progressBar.update(200)
+                        progressBar.stop()
+                        console.log(
+                            `server started on http://localhost:${PORT} succesfully! Took ${
+                                Date.now() - s
+                            }ms`
+                        )
+                    } catch (e) {
+                        console.warn(`something went wrong ${e}`)
+                    }
+                })
+                .catch((e) => console.warn(`something went wrong! ${e}`))
+        }).catch((e) => {
             console.warn(
                 `something went wrong connecting to the databases: ${e}`
             )
         })
+    }
 })
