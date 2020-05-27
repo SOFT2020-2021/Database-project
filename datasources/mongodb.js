@@ -66,6 +66,7 @@ const getByName = (name) => {
     return new Promise((resolve, reject) => {
         db.collection(collectionName).find({ name }, function (err, result) {
             if (err) reject(err)
+            console.log(result)
             resolve({ removed: result.result.n })
         })
     })

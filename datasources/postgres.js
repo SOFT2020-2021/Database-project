@@ -108,7 +108,6 @@ const populatePokemons = async (pokemons) => {
             }`
             return acc
         }, '')
-        console.log(values.subString(values.length - 5, values.length))
         await client.query(`INSERT INTO 
                                 pokemons(id, name)
                             VALUES ${values}`)

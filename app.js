@@ -74,10 +74,6 @@ Promise.all([
                     }
                 })
                 .catch((e) => console.warn(`something went wrong! ${e}`))
-        }).catch((e) => {
-            console.warn(
-                `something went wrong connecting to the databases: ${e}`
-            )
         })
     }
 })
