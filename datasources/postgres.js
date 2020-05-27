@@ -25,14 +25,21 @@ const close = () => {
 const deleteAllRows = async () => {
     const client = await pool.connect()
     try {
-        Promise.all([
-            (client.query('DELETE FROM trainers WHERE 1 > 0'),
-            client.query('DELETE FROM pokemons WHERE 1 > 0'),
-            client.query('DELETE FROM trainer_pokemons WHERE 1 > 0')),
-        ]).then(() => client.release())
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                (client.query('DELETE FROM trainers WHERE 1 > 0'),
+                client.query('DELETE FROM pokemons WHERE 1 > 0'),
+                client.query('DELETE FROM trainer_pokemons WHERE 1 > 0')),
+            ])
+                .then(() => {
+                    resolve()
+                })
+                .catch((e) => reject(e))
+        })
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with deleting all rows: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -49,12 +56,25 @@ const populateTrainerPokemons = async () => {
                 order by random() 
                 limit 6
             ) x`)
-        client.release()
     } catch (e) {
-        client.release()
         throw Error(
             `something went wrong with populating trainer pokemons: ${e}`
         )
+    } finally {
+        client.release()
+    }
+}
+
+const insertTrainer = async (trainerName) => {
+    const client = await pool.connect()
+    try {
+        await client.query('INSERT INTO trainers(name) VALUES($1)', [
+            trainerName,
+        ])
+    } catch (e) {
+        throw Error(`something went wrong with getting trainer by id: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -68,10 +88,10 @@ const populateTrainers = async () => {
         await client.query(`INSERT INTO 
                                 trainers(name) 
                             VALUES ${values}`)
-        client.release()
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with populating trainers: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -79,19 +99,44 @@ const populatePokemons = async (pokemons) => {
     const client = await pool.connect()
     try {
         const values = Object.values(pokemons).reduce((acc, cur, i) => {
+            //acc.split(',').forEach(e => console.log(e))
+            if(cur.name === undefined || cur.id === undefined){
+                return acc
+            }
             acc += `(${cur.id}, '${cur.name}')${
                 i !== pokemons.length - 1 ? ',' : ';'
             }`
             return acc
         }, '')
-
+        console.log(values.subString(values.length - 5, values.length))
         await client.query(`INSERT INTO 
                                 pokemons(id, name)
                             VALUES ${values}`)
-        client.release()
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with populate pokemons: ${e}`)
+    } finally {
+        client.release()
+    }
+}
+
+const getTeam = async (trainerId) => {
+    const client = await pool.connect()
+    try {
+        const pokemons = await client.query(
+            `SELECT pokemon_id AS pokemon_id 
+             FROM trainer_pokemons tp
+             JOIN pokemons p ON p.id = tp.pokemon_id
+             WHERE trainer_id = $1`,
+            [trainerId]
+        )
+        if (pokemons.rows.length === 0) {
+            throw Error('trainer does not exist')
+        }
+        return pokemons.rows
+    } catch (e) {
+        throw Error(`something went wrong with populate pokemons: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -102,11 +147,11 @@ const getTrainerById = async (userId) => {
             'SELECT * FROM trainers WHERE id = $1;',
             [userId]
         )
-        client.release()
         return user.rows[0]
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with getting trainer by id: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -117,11 +162,11 @@ const getTrainerByName = async (name) => {
             'SELECT * FROM trainers WHERE name = $1;',
             [name]
         )
-        client.release()
         return user.rows[0]
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with getting trainer by name: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -132,11 +177,11 @@ const updateTrainerName = async (newUserName, userId) => {
             newUserName,
             userId,
         ])
-        client.release()
         return true
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with updating a trainers name: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
@@ -149,17 +194,19 @@ const deleteTrainer = async (trainerId) => {
                             RETURNING(name);`,
             [trainerId]
         )
-        client.release()
         return data.rows[0].name ? true : false
     } catch (e) {
-        client.release()
         throw Error(`something went wrong with deleting a trainer: ${e}`)
+    } finally {
+        client.release()
     }
 }
 
 module.exports = {
     open,
     close,
+    insertTrainer,
+    getTeam,
     deleteAllRows,
     getTrainerById,
     deleteTrainer,

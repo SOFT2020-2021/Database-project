@@ -4,7 +4,7 @@ let redisClient
 
 const open = async () => {
     try {
-        await redis.createClient(REDIS_PORT)
+        redisClient = await redis.createClient(REDIS_PORT)
     } catch (e) {
         throw new Error(e)
     }
@@ -21,8 +21,7 @@ const getPokemons = (pokemonKeys) => {
                 if (err) {
                     reject(err)
                 }
-                /*const res = await getPokemon(pokemon.url)
-                resolve(res.data)*/
+                resolve({ [pokemonKey]: pokemon })
             })
         })
     })

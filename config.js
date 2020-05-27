@@ -1,4 +1,4 @@
-const production = false
+const production = true
 const pokemonLimit = production ? 1000 : 10
 const logTypes = Object.freeze({
     BATTLE: 'battle',

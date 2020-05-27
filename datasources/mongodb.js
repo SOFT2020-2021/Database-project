@@ -40,9 +40,22 @@ const insertMany = (documents) => {
     })
 }
 
+const getMany = (ids) => {
+    return new Promise((resolve, reject) => {
+        db.collection(collectionName).find(
+            { 'id': { $in: ids } },
+            (err, result) => {
+                if (err) reject(err)
+                console.log(result.result)
+                resolve(result)
+            }
+        )
+    })
+}
+
 const deleteAll = () => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).remove({}, function (err, result) {
+        db.collection(collectionName).deleteMany({}, function (err, result) {
             if (err) reject(err)
             resolve({ removed: result.result.n })
         })
@@ -51,7 +64,7 @@ const deleteAll = () => {
 
 const getByName = (name) => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).find({name}, function (err, result) {
+        db.collection(collectionName).find({ name }, function (err, result) {
             if (err) reject(err)
             resolve({ removed: result.result.n })
         })
@@ -60,6 +73,7 @@ const getByName = (name) => {
 
 module.exports = {
     getByName,
+    getMany,
     deleteAll,
     getAll,
     insertMany,
