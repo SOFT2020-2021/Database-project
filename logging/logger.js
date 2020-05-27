@@ -1,8 +1,9 @@
 const q = 'logs'
-const opt = {
+/*const opt = {
     credentials: require('amqplib').credentials.plain('admin', 'admin2017'),
 }
-const open = require('amqplib').connect('amqp://localhost', opt)
+*/
+const open = require('amqplib').connect('amqp://localhost') //add opt to add credentials
 const { logTypes } = require('../config')
 console.log(logTypes)
 
@@ -22,6 +23,7 @@ const createLogMessage = (content) => {
 }
 
 //createLogMessage({message: "hello blbla", pokemon: "id123", pokemon2: "id321"})
+
 
 createLogMessage({
     type: logTypes.BATTLE,
