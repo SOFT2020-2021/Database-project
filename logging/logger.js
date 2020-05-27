@@ -25,41 +25,6 @@ const createLogMessage = (content) => {
 //createLogMessage({message: "hello blbla", pokemon: "id123", pokemon2: "id321"})
 
 
-createLogMessage({
-    type: logTypes.BATTLE,
-    fight: 'fight122323233434342342345',
-    pokemon: 'id12323423',
-    pokemon2: 'id3321342',
-    turns: 12,
-    winner: 'id12233',
-})
-createLogMessage({
-    type: logTypes.BATTLE,
-    fight: 'fight332323232323652342342342343434',
-    pokemon: 'id32342123',
-    pokemon2: 'id22211234',
-    turns: 17,
-    winner: 'id212311',
-})
-
-//Test consumer //denne kan du bruge til at teste med.. RabbitMq benytter producer/consumer pattern
-
-/*
-const consumeMessage = () =>{
-    open.then(function(conn) {
-        return conn.createChannel();
-      }).then(function(ch) {
-        return ch.assertQueue(q).then(function(ok) {
-          return ch.consume(q, function(msg) {
-            if (msg !== null) {
-              console.log(JSON.parse(msg.content.toString()));
-              ch.ack(msg);
-            }
-          });
-        });
-      }).catch(console.warn);
+module.exports = {
+  createLogMessage
 }
-
-setTimeout(() => consumeMessage(), 1000)
-
-*/

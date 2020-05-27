@@ -26,7 +26,7 @@ const getAll = async () => {
             .find({})
             .toArray((err, result) => {
                 if (err) reject(err)
-                resolve(result)
+                rcreateUUIDesolve(result)
             })
     })
 }
