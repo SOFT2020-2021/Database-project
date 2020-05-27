@@ -5,6 +5,7 @@ const mongoClient = require('./datasources/mongodb')
 const postgresClient = require('./datasources/postgres')
 const pokemonRoutes = require('./routes/pokemonRoutes')
 const trainerRoutes = require('./routes/trainerRoutes')
+const fightRoutes = require('./routes/fightRoutes')
 const teamRoutes = require('./routes/teamRoutes')
 const pokemonApi = require('./util/pokemonApi')
 const cliProgress = require('cli-progress')
@@ -15,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/pokemon', pokemonRoutes)
 app.use('/trainer', trainerRoutes)
 app.use('/team', teamRoutes)
+app.use('/fight', fightRoutes)
 
 Promise.all([
     redisClient.open(),
@@ -48,7 +50,8 @@ Promise.all([
             progressBar.update(50)
             const pokemons = await pokemonApi.getPokemons()
             progressBar.update(100)
-            mongoClient.insertMany(pokemons)
+            await mongoClient.insertMany(pokemons)
+
             Promise.all([
                 postgresClient.populateTrainers(),
                 postgresClient.populatePokemons(
