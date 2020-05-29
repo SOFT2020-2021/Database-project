@@ -26,48 +26,48 @@ const getAll = async () => {
             .find({})
             .toArray((err, result) => {
                 if (err) reject(err)
-                rcreateUUIDesolve(result)
+                resolve(result)
             })
     })
 }
 
 const insertMany = (documents) => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).insertMany(documents, (err, result) => {
+        db.collection(collectionName).insertMany(documents, (err, res) => {
             if (err) reject(err)
-            resolve({ insertedDocuments: result.insertedCount })
+            resolve({ insertedDocuments: res.insertedCount })
         })
     })
 }
 
 const getMany = (ids) => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).find(
-            { 'id': { $in: ids } },
-            (err, result) => {
+        console.log('freaking ids', ids)
+        db.collection(collectionName)
+            .find({
+                id: { $in: ids },
+            })
+            .toArray((err, res) => {
                 if (err) reject(err)
-                console.log(result.result)
-                resolve(result)
-            }
-        )
+                resolve(res)
+            })
     })
 }
 
 const deleteAll = () => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).deleteMany({}, function (err, result) {
+        db.collection(collectionName).deleteMany({}, function (err, res) {
             if (err) reject(err)
-            resolve({ removed: result.result.n })
+            resolve({ removed: res.result.n })
         })
     })
 }
 
 const getByName = (name) => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).find({ name }, function (err, result) {
+        db.collection(collectionName).find({ name }, function (err, res) {
             if (err) reject(err)
-            console.log(result)
-            resolve({ removed: result.result.n })
+            resolve({ removed: res.result.n })
         })
     })
 }

@@ -2,7 +2,6 @@
 DROP DATABASE IF EXISTS pokemon_db;
 CREATE DATABASE pokemon_db;
 
-
 DROP TABLE IF EXISTS trainers;
 DROP TABLE IF EXISTS trainer_pokemons;
 DROP TABLE IF EXISTS pokemons;

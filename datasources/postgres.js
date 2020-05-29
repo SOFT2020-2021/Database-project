@@ -99,7 +99,6 @@ const populatePokemons = async (pokemons) => {
     const client = await pool.connect()
     try {
         const values = Object.values(pokemons).reduce((acc, cur, i) => {
-            //acc.split(',').forEach(e => console.log(e))
             if(cur.name === undefined || cur.id === undefined){
                 return acc
             }
@@ -108,6 +107,7 @@ const populatePokemons = async (pokemons) => {
             }`
             return acc
         }, '')
+
         await client.query(`INSERT INTO 
                                 pokemons(id, name)
                             VALUES ${values}`)
@@ -122,14 +122,14 @@ const getTeam = async (trainerId) => {
     const client = await pool.connect()
     try {
         const pokemons = await client.query(
-            `SELECT pokemon_id AS pokemon_id 
+            `SELECT pokemon_id 
              FROM trainer_pokemons tp
              JOIN pokemons p ON p.id = tp.pokemon_id
              WHERE trainer_id = $1`,
             [trainerId]
         )
         if (pokemons.rows.length === 0) {
-            throw Error('trainer does not exist')
+            throw Error('trainer or team does not exist')
         }
         return pokemons.rows
     } catch (e) {
