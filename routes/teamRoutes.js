@@ -2,6 +2,8 @@ const { Router } = require('express')
 const postgresClient = require('../datasources/postgres')
 const redisClient = require('../datasources/redis')
 const mongoClient = require('../datasources/mongodb')
+const { trim } = require('../util/pokemonTrimmer')
+const { segregate } = require('../util/segregateKnownPokemon') 
 const router = Router()
 
 router.get('/:trainerId', async (req, res) => {
@@ -18,15 +20,8 @@ router.get('/:trainerId', async (req, res) => {
         //getting pokemons from redis
         const pokemons = await redisClient.getPokemons(pokemonIds)
 
-        //dividing known pokemons and missing pokemons
-        const missing = Object.values(pokemons).reduce((acc, cur) => {
-            if (Object.values(cur)[0] === null) {
-                acc.push(Number(Object.keys(cur)[0]))
-            } else {
-                pokemonTeam.push(JSON.parse(Object.values(cur)[0]))
-            }
-            return acc
-        }, [])
+        //inserts found pokemons into pokemonTeam and returns missing pokemon
+        const missing = segregate(pokemonTeam, pokemons)
 
         //if no pokemons did not exist in redis,
         //we can assume we have the whole team and just return it without contacting mongodb
@@ -38,20 +33,9 @@ router.get('/:trainerId', async (req, res) => {
 
             //formatting them, excluding the unercersarry data
             pokemons.forEach((fullPokemon) => {
-                const trimmedPokemon = {
-                    id: fullPokemon.id,
-                    name: fullPokemon.name,
-                }
-                trimmedPokemon.stats = fullPokemon.stats.reduce((acc, cur) => {
-                    acc[cur.stat.name] = cur.base_stat
-                    return acc
-                }, {})
-                trimmedPokemon.moves = fullPokemon.moves.reduce((acc, cur) => {
-                    acc.push(cur.move.name)
-                    return acc
-                }, [])
-                pokemonTeam.push(trimmedPokemon)
+                pokemonTeam.push(trim(fullPokemon))
             })
+
             //inserting them into redis
             redisClient.persistPokemons(pokemonTeam)
 

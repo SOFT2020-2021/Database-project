@@ -23,7 +23,7 @@ const close = () => {
 const getAll = async () => {
     return new Promise((resolve, reject) => {
         db.collection(collectionName)
-            .find({})
+            .find()
             .toArray((err, result) => {
                 if (err) reject(err)
                 resolve(result)
@@ -42,7 +42,6 @@ const insertMany = (documents) => {
 
 const getMany = (ids) => {
     return new Promise((resolve, reject) => {
-        console.log('freaking ids', ids)
         db.collection(collectionName)
             .find({
                 id: { $in: ids },
@@ -65,9 +64,10 @@ const deleteAll = () => {
 
 const getByName = (name) => {
     return new Promise((resolve, reject) => {
-        db.collection(collectionName).find({ name }, function (err, res) {
+        db.collection(collectionName).findOne({ 'name': name }, function (err, res) {
             if (err) reject(err)
-            resolve({ removed: res.result.n })
+            console.log(res)
+            resolve({ pokemon: res })
         })
     })
 }
