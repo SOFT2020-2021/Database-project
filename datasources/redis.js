@@ -17,7 +17,7 @@ const close = () => {
 const getPokemons = (pokemonKeys) => {
     const readOperations = pokemonKeys.map((pokemonKey) => {
         return new Promise((resolve, reject) => {
-            redisClient.hgetall(pokemonKey, async function (err, pokemon) {
+            redisClient.get(pokemonKey, async function (err, pokemon) {
                 if (err) {
                     reject(err)
                 }
@@ -30,10 +30,10 @@ const getPokemons = (pokemonKeys) => {
 
 const persistPokemons = (pokemons) => {
     pokemons.forEach((pokemon) => {
-        redisClient.hmset(pokemon.name, pokemon, function (err, result) {
+        redisClient.set(pokemon.id, JSON.stringify(pokemon), function (err, result) {
             if (err) {
                 console.log(err)
-                throw new Error('Could not insert pokemon')
+                throw new Error(`Could not insert pokemon, ${pokemon}`)
             }
             return result
         })

@@ -2,24 +2,44 @@ const { Router } = require('express')
 const postgresClient = require('../datasources/postgres')
 const redisClient = require('../datasources/redis')
 const mongoClient = require('../datasources/mongodb')
+const { trim } = require('../util/pokemonTrimmer')
+const { segregate } = require('../util/segregateKnownPokemon') 
 const router = Router()
 
 router.get('/:trainerId', async (req, res) => {
     try {
+        const pokemonTeam = []
+
+        //getting trainer teams from postgres
         const team = await postgresClient.getTeam(req.params.trainerId)
-        console.log(Object.keys(team))
-        const pokemons = await redisClient.getPokemons(Object.keys(team))
-        const data = Object.values(pokemons).reduce((acc, cur) => {
-            if(Object.values(cur)[0] === null){
-                acc.missing.push(Object.keys(cur)[0])
-            }
+        const pokemonIds = team.reduce((acc, cur) => {
+            acc.push(cur.pokemon_id)
             return acc
-        }, {pokemons: [], missing: []})
-        if(data.missing.length === 0){
-            res.json(data.pokemons)
+        }, [])
+
+        //getting pokemons from redis
+        const pokemons = await redisClient.getPokemons(pokemonIds)
+
+        //inserts found pokemons into pokemonTeam and returns missing pokemon
+        const missing = segregate(pokemonTeam, pokemons)
+
+        //if no pokemons did not exist in redis,
+        //we can assume we have the whole team and just return it without contacting mongodb
+        if (missing.length === 0) {
+            res.json(pokemonTeam)
         } else {
-            const rez = await mongoClient.getMany(data.missing)
-            console.log(rez)
+            //getting the pokemons from mongodb
+            const pokemons = await mongoClient.getMany(missing)
+
+            //formatting them, excluding the unercersarry data
+            pokemons.forEach((fullPokemon) => {
+                pokemonTeam.push(trim(fullPokemon))
+            })
+
+            //inserting them into redis
+            redisClient.persistPokemons(pokemonTeam)
+
+            res.json(pokemonTeam)
         }
     } catch (e) {
         res.status(500).send(e.toString())
