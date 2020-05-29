@@ -1,7 +1,6 @@
 # Database-project
 Database projekt med Redis og MongoDB
 
-<<<<<<< HEAD
 ### Setting up environment
 IDE vscode
 code conventions are a plugins: eslint, prettier
