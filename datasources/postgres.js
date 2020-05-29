@@ -139,6 +139,33 @@ const getTeam = async (trainerId) => {
     }
 }
 
+const getRandomTrainer = async() =>{
+const client = await pool.connect()
+try{
+    const user = await client.query(`
+    SELECT id from trainers where id = (
+        SELECT
+   FLOOR(RANDOM() *
+   (
+      (SELECT
+             min(id)  
+          FROM
+             trainers) -
+      ((SELECT
+            max(id)  
+         FROM
+            trainers) + 1
+   )) +1
+    ) + (SELECT
+            max(id)  
+         FROM
+        trainers));`)
+        return user.rows[0]
+}catch(e){
+    throw Error(`Could not fetch random user ${e}`)
+}
+}
+
 const getTrainerById = async (userId) => {
     const client = await pool.connect()
     try {
@@ -205,6 +232,7 @@ module.exports = {
     open,
     close,
     insertTrainer,
+    getRandomTrainer,
     getTeam,
     deleteAllRows,
     getTrainerById,
