@@ -65,12 +65,12 @@ const populateTrainerPokemons = async () => {
     }
 }
 
-const insertTrainer = async (trainerName) => {
+const insertTrainer = async (trainerName, ids) => {
     const client = await pool.connect()
     try {
-        await client.query('INSERT INTO trainers(name) VALUES($1)', [
-            trainerName,
-        ])
+        const id = await client.query("INSERT INTO trainers (name) values ($1) RETURNING (id)", [trainerName])
+        console.log(id.rows[0].id)
+        await client.query("INSERT into trainer_pokemons (trainer_id,pokemon_id) values ($1, $2), ($1, $3), ($1, $4), ($1, $5), ($1, $6), ($1, $7) ", [id.rows[0].id].concat(ids))
     } catch (e) {
         throw Error(`something went wrong with getting trainer by id: ${e}`)
     } finally {
@@ -139,22 +139,6 @@ const getTeam = async (trainerId) => {
     }
 }
 
-<<<<<<< HEAD
-const updateTrainersPokemon = async (newPokemonId, oldPokemonId, trainerId) => {
-    const client = await pool.connect()
-    try {
-        await client.query(
-            `UPDATE trainer_pokemons 
-            SET pokemon_id =  $1 
-            WHERE pokemon_id = $2 AND trainer_id = $3;`,
-            [newPokemonId, oldPokemonId, trainerId]
-        )
-    } catch (e) {
-        throw Error(`something went wrong with populate pokemons: ${e}`)
-    } finally {
-        client.release()
-    }
-=======
 const getRandomTrainer = async() =>{
 const client = await pool.connect()
 try{
@@ -180,7 +164,6 @@ try{
 }catch(e){
     throw Error(`Could not fetch random user ${e}`)
 }
->>>>>>> 64da5c4424edbfc122e728cc7296fa47a3db0d6f
 }
 
 const getTrainerById = async (userId) => {
@@ -248,7 +231,7 @@ const deleteTrainer = async (trainerId) => {
 module.exports = {
     open,
     close,
-    updateTrainersPokemon,
+    //updateTrainersPokemon,
     insertTrainer,
     getRandomTrainer,
     getTeam,

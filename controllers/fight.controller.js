@@ -40,7 +40,6 @@ const generateMultiFightData = (participants) => {
     }
 }
 
-<<<<<<< HEAD
 
 const twoPlayerRandomFight = async (participant) =>{
     const randomParticipant = getRandomTrainer()
@@ -55,11 +54,7 @@ const twoPlayerRandomFight = async (participant) =>{
 }
 
 
-
-const twoPlayerFight = async (participant1, participant2) =>{
-=======
 const twoPlayerFight = (participant1, participant2) => {
->>>>>>> 263180df3ec6e183eb1626e669987a732bd81826
     const fightData = generateFightData(participant1, participant2)
     try {
         createLogMessage(fightData)
@@ -83,14 +78,12 @@ const multiPlayerFight = (participants) => {
 
 module.exports = {
     twoPlayerFight,
-<<<<<<< HEAD
     multiPlayerFight,
     twoPlayerRandomFight
-=======
->>>>>>> 263180df3ec6e183eb1626e669987a732bd81826
 }
+
 
 const data = twoPlayerFight('Hans', 'Erik')
 const _data = multiPlayerFight(['Hans', 'moster', 'søster', 'hanne'])
 console.log(data)
-console.log(_data)
+console.log(_data);
