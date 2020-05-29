@@ -1,6 +1,7 @@
 const { logTypes } = require('../config')
 const { createUUID } = require('../util/idGenerator')
 const { createLogMessage } = require('../logging/logger')
+const { getRandomTrainer } = require('../datasources/postgres'); 
 
 const pokemons = ['pikachu', 'ratata', 'mewtwo', 'onyx', 'geodude', 'abra']
 const generateFightData = (participant1, participant2) => {
@@ -39,7 +40,26 @@ const generateMultiFightData = (participants) => {
     }
 }
 
+<<<<<<< HEAD
+
+const twoPlayerRandomFight = async (participant) =>{
+    const randomParticipant = getRandomTrainer()
+    const fightData = generateFightData(participant, randomParticipant)
+    try{
+        createLogMessage(fightData)
+    }catch(err){
+        console.log(err)
+        throw(err)
+    }
+    return fightData
+}
+
+
+
+const twoPlayerFight = async (participant1, participant2) =>{
+=======
 const twoPlayerFight = (participant1, participant2) => {
+>>>>>>> 263180df3ec6e183eb1626e669987a732bd81826
     const fightData = generateFightData(participant1, participant2)
     try {
         createLogMessage(fightData)
@@ -63,6 +83,11 @@ const multiPlayerFight = (participants) => {
 
 module.exports = {
     twoPlayerFight,
+<<<<<<< HEAD
+    multiPlayerFight,
+    twoPlayerRandomFight
+=======
+>>>>>>> 263180df3ec6e183eb1626e669987a732bd81826
 }
 
 const data = twoPlayerFight('Hans', 'Erik')
