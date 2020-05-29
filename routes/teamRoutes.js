@@ -3,7 +3,7 @@ const postgresClient = require('../datasources/postgres')
 const redisClient = require('../datasources/redis')
 const mongoClient = require('../datasources/mongodb')
 const { trim } = require('../util/pokemonTrimmer')
-const { segregate } = require('../util/segregateKnownPokemon') 
+const { segregate } = require('../util/segregateKnownPokemon')
 const router = Router()
 
 router.get('/:trainerId', async (req, res) => {
@@ -43,6 +43,21 @@ router.get('/:trainerId', async (req, res) => {
         }
     } catch (e) {
         res.status(500).send(e.toString())
+    }
+})
+
+router.put('/xD', async (req, res) => {
+    try {
+        console.log(req.body)
+        const { currentPokemonId, newPokemonId, trainerId } = req.params
+        postgresClient.updateTrainersPokemon(
+            currentPokemonId,
+            newPokemonId,
+            trainerId
+        )
+        res.status(204).send('updated pokemon succesfully!')
+    } catch (e) {
+        res.status(500).send(`something went wrong on the server ${e}`)
     }
 })
 

@@ -99,7 +99,7 @@ const populatePokemons = async (pokemons) => {
     const client = await pool.connect()
     try {
         const values = Object.values(pokemons).reduce((acc, cur, i) => {
-            if(cur.name === undefined || cur.id === undefined){
+            if (cur.name === undefined || cur.id === undefined) {
                 return acc
             }
             acc += `(${cur.id}, '${cur.name}')${
@@ -132,6 +132,22 @@ const getTeam = async (trainerId) => {
             throw Error('trainer or team does not exist')
         }
         return pokemons.rows
+    } catch (e) {
+        throw Error(`something went wrong with populate pokemons: ${e}`)
+    } finally {
+        client.release()
+    }
+}
+
+const updateTrainersPokemon = async (newPokemonId, oldPokemonId, trainerId) => {
+    const client = await pool.connect()
+    try {
+        await client.query(
+            `UPDATE trainer_pokemons 
+            SET pokemon_id =  $1 
+            WHERE pokemon_id = $2 AND trainer_id = $3;`,
+            [newPokemonId, oldPokemonId, trainerId]
+        )
     } catch (e) {
         throw Error(`something went wrong with populate pokemons: ${e}`)
     } finally {
@@ -204,6 +220,7 @@ const deleteTrainer = async (trainerId) => {
 module.exports = {
     open,
     close,
+    updateTrainersPokemon,
     insertTrainer,
     getTeam,
     deleteAllRows,

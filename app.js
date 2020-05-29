@@ -12,7 +12,7 @@ const cliProgress = require('cli-progress')
 const { production } = require('./config')
 const PORT = process.env.PORT || 3001
 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 app.use('/pokemon', pokemonRoutes)
 app.use('/trainer', trainerRoutes)
 app.use('/team', teamRoutes)
